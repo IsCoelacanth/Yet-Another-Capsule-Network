@@ -4,11 +4,19 @@ import torch.nn as nn
 
 
 class CapsuleLayer(nn.Module):
-    """
-    Basic Capsule layer: when num_routes is >0 it acts as the dynamic routing Digit Cap layer, other wise as a primary
-    capsule layer
-    """
     def __init__(self, num_caps, num_routes, in_channels, out_channels, k_size=None, stride=None, num_rounds=3):
+        """
+        A single capsule, two modes of operation.
+            1. As a primary (or consequent) capsule
+            2. As the digit/class capsule, with the routing procedure.
+        :param num_caps: Number of capsules.
+        :param num_routes: Number of routes.
+        :param in_channels: Input channels from previous layer.
+        :param out_channels: Output channels to next layer.
+        :param k_size: Kernel size for primary capsules.
+        :param stride: Kernel stride for primary capsules.
+        :param num_rounds: Number of routing rounds.
+        """
         super(CapsuleLayer, self).__init__()
 
         self.num_routes = num_routes
@@ -32,7 +40,6 @@ class CapsuleLayer(nn.Module):
     def forward(self, x):
 
         if self.num_routes != -1:
-            # print(x.shape, self.W.shape)
             priors = x[None, :, :, None, :] @ self.W[:, None, :, :, :]
             logits = torch.zeros(*priors.size(), device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'),
                                  requires_grad = True)

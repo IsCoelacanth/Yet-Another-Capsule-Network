@@ -4,17 +4,32 @@ import torch.nn as nn
 
 from Capsule import CapsuleLayer
 from exp_decoder import Decoder
+import math
 
+def conv_size(shape, k = 9, s = 1, p = False):
+    H, W = shape
+    if p:
+        pad = (k-1)//2
+    else:
+        pad = 0
+
+    Ho = math.floor(((H + 2*pad - (k - 1) - 1)/s) + 1)
+    Wo = math.floor(((W + 2*pad - (k - 1) - 1)/s) + 1)
+
+    return Ho, Wo
 
 class CapsuleNetwork(nn.Module):
-
-    def __init__(self):
+    def __init__(self, img_size, ic_channels, num_pcaps, num_classes, num_coc, num_doc, mode='mono', use_padding=False):
         super(CapsuleNetwork, self).__init__()
 
-        self.initial_conv = nn.Conv2d(in_channels=3, out_channels=256, kernel_size=9, stride=1)
-        self.p_caps = CapsuleLayer(num_caps=8, num_routes=-1, in_channels=256, out_channels=32,
+        self.initial_conv = nn.Conv2d(in_channels=1 if mode=='mono' else 3, out_channels=ic_channels, kernel_size=9, stride=1)
+        Ho, Wo = conv_size(img_size, k=9, s=1, p=False)
+
+        self.p_caps = CapsuleLayer(num_caps=num_pcaps, num_routes=-1, in_channels=ic_channels, out_channels=num_coc,
                                    k_size=9, stride=2)
-        self.d_caps = CapsuleLayer(num_caps=10, num_routes=32*28*28, in_channels=8, out_channels=16)
+        Ho, Wo = conv_size((Ho, Wo), k=9, s=2, p=use_padding)
+
+        self.d_caps = CapsuleLayer(num_caps=num_classes, num_routes=num_coc*Ho*Wo, in_channels=num_pcaps, out_channels=num_doc)
 
         self.decoder = Decoder()
 
