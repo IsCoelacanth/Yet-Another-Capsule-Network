@@ -8,8 +8,11 @@ def get_dataset(path, batch_size, ih, iw):
         transforms.Resize((ih,iw)),
         transforms.ToTensor()])
 
-    train_set = datasets.STL10(path, 'train', transform=trf, download=True)
-    test_set = datasets.STL10(path, 'test', transform=trf, download=True)
+    # train_set = datasets.STL10(path, 'train', transform=trf, download=True)
+    # test_set = datasets.STL10(path, 'test', transform=trf, download=True)
+
+    train_set = datasets.MNIST(path, True, transform=trf, download=True)
+    test_set = datasets.MNIST(path, False, transform=trf, download=True)
 
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, drop_last=True)
     test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=True, drop_last=True)

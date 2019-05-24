@@ -18,6 +18,7 @@ def conv_size(shape, k = 9, s = 1, p = False):
 
     return Ho, Wo
 
+
 class CapsuleNetwork(nn.Module):
     def __init__(self, img_size, ic_channels, num_pcaps, num_classes, num_coc, num_doc, mode='mono', use_padding=False):
         super(CapsuleNetwork, self).__init__()
@@ -61,6 +62,7 @@ class CapsuleLoss(nn.Module):
         label = torch.eye(10, device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'),
                   requires_grad=True).index_select(dim=0, index=label.data)
         # print(classes.size(), label.size())
+        # print(img.size(), reconst.size())
         left = func.relu(0.9-classes) ** 2
         right = func.relu(classes - 0.1) ** 2
 
